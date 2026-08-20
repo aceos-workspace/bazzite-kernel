@@ -1149,6 +1149,9 @@ Patch2: patch-2-handheld.patch
 Patch3: patch-3-akmods.patch
 %endif
 
+# AceOS 定制：backport upstream fix for rust 1.93+ -Cjump-tables=n
+Patch9000: patch-9000-rust-cjump-tables.patch
+
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
 
@@ -2080,6 +2083,9 @@ ApplyOptionalPatch patch-1-redhat.patch
 ApplyOptionalPatch patch-2-handheld.patch
 ApplyOptionalPatch patch-3-akmods.patch
 %endif
+
+# AceOS 定制：backport upstream fix for rust 1.93+ -Cjump-tables=n
+ApplyPatch patch-9000-rust-cjump-tables.patch
 
 ApplyOptionalPatch linux-kernel-test.patch
 

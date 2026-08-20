@@ -1,0 +1,29 @@
+From: AceOS Build <build@aceos.local>
+Date: Thu, 20 Aug 2026 00:00:00 +0000
+Subject: [PATCH] x86: rust: kbuild: support -Cjump-tables=n for Rust 1.93.0+
+
+Rust 1.93.0 stabilized -Zno-jump-tables as -Cjump-tables=n. This causes
+the build to fail with newer rustc (Fedora 43 ships rust 1.96.0):
+
+    error: unknown unstable option: `no-jump-tables`
+
+Backport the upstream fix which uses rustc-min-version to pick the right
+form.
+
+Signed-off-by: AceOS Build <build@aceos.local>
+---
+ arch/x86/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/Makefile b/arch/x86/Makefile
+--- a/arch/x86/Makefile
++++ b/arch/x86/Makefile
+@@ -5,7 +5,7 @@
+ #   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104816
+ #
+ KBUILD_CFLAGS += $(call cc-option,-fcf-protection=branch -fno-jump-tables)
+-KBUILD_RUSTFLAGS += -Zcf-protection=branch -Zno-jump-tables
++KBUILD_RUSTFLAGS += -Zcf-protection=branch $(if $(call rustc-min-version,109300),-Cjump-tables=n,-Zno-jump-tables)
+ else
+ KBUILD_CFLAGS += $(call cc-option,-fcf-protection=none)
+ endif
