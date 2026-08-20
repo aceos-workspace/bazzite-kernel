@@ -75,15 +75,43 @@ fi
 linuxfn="linux-${TARFILE_RELEASE}.tar.xz"
 zfsfn="zfs-${ZFS_RELEASE}.tar.gz"
 
+download_with_fallback() {
+    local outfile="$1"
+    shift
+    local urls=("$@")
+    local url
+    for url in "${urls[@]}"; do
+        echo "Trying: $url"
+        # 每次尝试单独 curl，成功即返回
+        if curl --fail --connect-timeout 30 --max-time 900 --retry 5 --retry-delay 10 \
+                --retry-all-errors --http1.1 -L -o "$outfile.part" "$url"; then
+            # 验证：xz 文件用 xz -t 试；tar.gz 用 gzip -t 试
+            case "$outfile" in
+                *.tar.xz) xz -t "$outfile.part" 2>/dev/null && { mv "$outfile.part" "$outfile"; echo "OK: $url"; return 0; } ;;
+                *.tar.gz) gzip -t "$outfile.part" 2>/dev/null && { mv "$outfile.part" "$outfile"; echo "OK: $url"; return 0; } ;;
+                *.run)    [ -s "$outfile.part" ] && { mv "$outfile.part" "$outfile"; echo "OK: $url"; return 0; } ;;
+                *)        [ -s "$outfile.part" ] && { mv "$outfile.part" "$outfile"; echo "OK: $url"; return 0; } ;;
+            esac
+            echo "Downloaded but file corrupt from: $url"
+            rm -f "$outfile.part"
+        fi
+    done
+    echo "ERROR: all mirrors failed for $outfile"
+    return 1
+}
+
 if [ ! -f "$linuxfn" ]; then
     echo "Downloading $linuxfn"
-    curl --fail --retry 10 --retry-delay 5 --retry-all-errors --http1.1 -C - -L \
-         -o "$linuxfn" "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz"
+    download_with_fallback "$linuxfn" \
+        "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz" \
+        "https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz" \
+        "https://git.kernel.org/torvalds/t/linux-${TARFILE_RELEASE}.tar.gz" \
+        "https://mirrors.tuna.tsinghua.edu.cn/kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz" \
+        "https://mirrors.aliyun.com/linux-kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz"
 fi
 if [ ! -f "$zfsfn" ]; then
     echo "Downloading $zfsfn"
-    curl --fail --retry 10 --retry-delay 5 --retry-all-errors --http1.1 -C - -L \
-         -o "$zfsfn" \
+    download_with_fallback "$zfsfn" \
         "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_RELEASE}/zfs-${ZFS_RELEASE}.tar.gz"
 fi
 
@@ -102,9 +130,9 @@ for nvrelease in "${nvreleases[@]}"; do
 
     if [ ! -f "$RUN_FN" ]; then
         echo "Downloading $RUN_FN"
-        curl --fail --retry 10 --retry-delay 5 --retry-all-errors --http1.1 -C - -L \
-             -o $RUN_FN \
-                    "https://download.nvidia.com/XFree86/Linux-$ARCH/${nvrelease}/NVIDIA-Linux-$ARCH-${nvrelease}.run"
+        download_with_fallback "$RUN_FN" \
+            "https://download.nvidia.com/XFree86/Linux-$ARCH/${nvrelease}/NVIDIA-Linux-$ARCH-${nvrelease}.run" \
+            "https://us.download.nvidia.com/XFree86/Linux-$ARCH/${nvrelease}/NVIDIA-Linux-$ARCH-${nvrelease}.run"
     fi
 
     rm -rf build/nvidia
