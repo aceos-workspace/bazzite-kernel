@@ -990,7 +990,7 @@ Source13: ubmok101.cer
 Source14: ubmok102.cer
 
 # AceOS 定制：签名子证书，构建时嵌入到 kernel .builtin_trusted_keys
-Source200: aceos_signing.pem
+Source9000: aceos_signing.pem
 
 %if %{with_ubsb}
 %define pesign(i:o:C:e:c:n:a:s) \
@@ -2323,7 +2323,7 @@ InitBuildVars() {
 
     # AceOS 定制：把签名子证书复制到 certs/ 并注入 CONFIG_SYSTEM_TRUSTED_KEYS，
     # 这样内核构建时会把该证书编入 .builtin_trusted_keys，运行时用于验证 out-of-tree 模块签名
-    cp %{SOURCE200} certs/aceos_signing.pem
+    cp %{SOURCE9000} certs/aceos_signing.pem
     ./scripts/config --file .config --set-str SYSTEM_TRUSTED_KEYS "certs/aceos_signing.pem"
     %{log_msg "InitBuildVars: AceOS signing cert injected"}
     grep '^CONFIG_SYSTEM_TRUSTED_KEYS=' .config || true
