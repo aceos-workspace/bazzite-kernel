@@ -77,11 +77,13 @@ zfsfn="zfs-${ZFS_RELEASE}.tar.gz"
 
 if [ ! -f "$linuxfn" ]; then
     echo "Downloading $linuxfn"
-    curl -L -o "$linuxfn" "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz"
+    curl --fail --retry 10 --retry-delay 5 --retry-all-errors --http1.1 -C - -L \
+         -o "$linuxfn" "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz"
 fi
 if [ ! -f "$zfsfn" ]; then
     echo "Downloading $zfsfn"
-    curl -L -o "$zfsfn" \
+    curl --fail --retry 10 --retry-delay 5 --retry-all-errors --http1.1 -C - -L \
+         -o "$zfsfn" \
         "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_RELEASE}/zfs-${ZFS_RELEASE}.tar.gz"
 fi
 
@@ -100,7 +102,8 @@ for nvrelease in "${nvreleases[@]}"; do
 
     if [ ! -f "$RUN_FN" ]; then
         echo "Downloading $RUN_FN"
-        curl -L -o $RUN_FN \
+        curl --fail --retry 10 --retry-delay 5 --retry-all-errors --http1.1 -C - -L \
+             -o $RUN_FN \
                     "https://download.nvidia.com/XFree86/Linux-$ARCH/${nvrelease}/NVIDIA-Linux-$ARCH-${nvrelease}.run"
     fi
 

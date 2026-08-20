@@ -104,6 +104,7 @@ jobs:
 
       - name: Compile Kernel
         run: |
+          set -o pipefail
           # Use ccache if:
           # We have a cache hit and ccache is enabled for use
           # OR we are writing to ccache (bazzite- branch)
