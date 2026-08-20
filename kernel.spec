@@ -2332,6 +2332,19 @@ InitBuildVars() {
     %{log_msg "InitBuildVars: AceOS signing cert injected"}
     grep '^CONFIG_SYSTEM_TRUSTED_KEYS=' .config || true
 
+    # AceOS 定制：禁用 CONFIG_RUST
+    # 原因：Fedora 43 提供 rustc 1.97.1，Rust 1.93+ 稳定化了 -Zno-jump-tables，
+    # Rust 1.95+ 稳定化了自定义 target JSON 加载，与 Linux 6.17.7 上游代码不兼容。
+    # 且截至 Linux 6.17，Rust 内核模块无任何生产用途——没有 in-tree Rust 驱动/模块，
+    # 只有实验性抽象层供未来 out-of-tree 驱动开发者使用。禁用不影响任何实际功能。
+    # 参考: https://www.kernel.org/doc/html/v6.17/rust/index.html
+    ./scripts/config --file .config --disable RUST
+    ./scripts/config --file .config --disable RUST_FW_LOADER_ABSTRACTIONS
+    ./scripts/config --file .config --disable RUST_PHYLIB_ABSTRACTIONS
+    ./scripts/config --file .config --disable SAMPLES_RUST
+    %{log_msg "InitBuildVars: Rust support disabled (no in-tree Rust drivers in 6.17)"}
+    grep '^CONFIG_RUST' .config || true
+
 %if %{with_debuginfo} == 0
     sed -i 's/^\(CONFIG_DEBUG_INFO.*\)=y/# \1 is not set/' .config
 %endif
