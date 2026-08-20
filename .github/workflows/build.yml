@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - bazzite-*
+      - "*-aceos"
+      - "*-aceos-*"
     tags:
       - "*-ba*"
       - "*-rc*"
+      - "*-aceos*"
+  workflow_dispatch:
 
 permissions:
   id-token: write

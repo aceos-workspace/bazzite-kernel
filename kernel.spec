@@ -176,13 +176,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.17.7
 %define specversion 6.17.7
 %define patchversion 6.17
-%define pkgrelease ba05
+%define pkgrelease ba05.aceos
 %define kversion 6
 %define tarfile_release 6.17.7
 # This is needed to do merge window version magic
 %define patchlevel 17
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease ba05%{?buildid}%{?dist}
+%define specrelease ba05.aceos%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.17.7
 
@@ -988,6 +988,9 @@ Source7: zfs-%{zfs_version}.tar.gz
 
 Source13: ubmok101.cer
 Source14: ubmok102.cer
+
+# AceOS 定制：签名子证书，构建时嵌入到 kernel .builtin_trusted_keys
+Source200: aceos_signing.pem
 
 %if %{with_ubsb}
 %define pesign(i:o:C:e:c:n:a:s) \
@@ -2317,6 +2320,13 @@ InitBuildVars() {
     %if %{signkernel}%{signmodules}
     cp configs/x509.genkey certs/.
     %endif
+
+    # AceOS 定制：把签名子证书复制到 certs/ 并注入 CONFIG_SYSTEM_TRUSTED_KEYS，
+    # 这样内核构建时会把该证书编入 .builtin_trusted_keys，运行时用于验证 out-of-tree 模块签名
+    cp %{SOURCE200} certs/aceos_signing.pem
+    ./scripts/config --file .config --set-str SYSTEM_TRUSTED_KEYS "certs/aceos_signing.pem"
+    %{log_msg "InitBuildVars: AceOS signing cert injected"}
+    grep '^CONFIG_SYSTEM_TRUSTED_KEYS=' .config || true
 
 %if %{with_debuginfo} == 0
     sed -i 's/^\(CONFIG_DEBUG_INFO.*\)=y/# \1 is not set/' .config
