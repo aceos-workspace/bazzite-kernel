@@ -103,8 +103,8 @@ download_with_fallback() {
 if [ ! -f "$linuxfn" ]; then
     echo "Downloading $linuxfn"
     download_with_fallback "$linuxfn" \
-        "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz" \
         "https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz" \
+        "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz" \
         "https://git.kernel.org/torvalds/t/linux-${TARFILE_RELEASE}.tar.gz" \
         "https://mirrors.tuna.tsinghua.edu.cn/kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz" \
         "https://mirrors.aliyun.com/linux-kernel/v6.x/linux-${TARFILE_RELEASE}.tar.xz"
