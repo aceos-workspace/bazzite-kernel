@@ -1149,8 +1149,7 @@ Patch2: patch-2-handheld.patch
 Patch3: patch-3-akmods.patch
 %endif
 
-# AceOS 定制：backport upstream fix for rust 1.93+ -Cjump-tables=n
-Patch9000: patch-9000-rust-cjump-tables.patch
+# AceOS 定制：Rust 版本通过 Dockerfile 锁定为 1.92.0，与 6.17 内核原生兼容，无需 patch
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -2084,8 +2083,7 @@ ApplyOptionalPatch patch-2-handheld.patch
 ApplyOptionalPatch patch-3-akmods.patch
 %endif
 
-# AceOS 定制：backport upstream fix for rust 1.93+ -Cjump-tables=n
-ApplyPatch patch-9000-rust-cjump-tables.patch
+# AceOS 定制：Rust 版本通过 Dockerfile 锁定为 1.92.0，与 6.17 内核原生兼容，无需 patch
 
 ApplyOptionalPatch linux-kernel-test.patch
 
